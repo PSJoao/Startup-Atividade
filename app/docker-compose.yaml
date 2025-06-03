@@ -1,0 +1,59 @@
+services:
+  php:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+
+    container_name: startup-ifsp-php
+    restart: always
+    volumes:
+      - ./web:/var/www/html/
+    networks:
+      - lamp-network
+    ports:
+      - "8080:80"
+    links:
+      - mysql
+
+  mysql:
+    image: mysql:5.7
+    container_name: startup-ifsp-mysql
+    restart: always
+    volumes:
+      - ./mysql:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: senha_da_nasa
+      MYSQL_DATABASE: startup
+    networks:
+      - lamp-network
+
+  phpmyadmin:
+    build:
+      context: ./phpmyadmin
+      dockerfile: Dockerfile
+
+    container_name: startup-ifsp-phpmyadmin
+    restart: always
+    volumes:
+      - /sessions
+    ports:
+      - "8080:80"
+    links:
+      - mysql
+    environment:
+      PMA_ARBITRARY: 0
+      PMA_HOST: mysql
+    networks:
+      - lamp-network
+
+networks:
+  lamp-network:
+    driver: bridge
+
+volumes:
+  postgres:
+  mysql:
+  web:
+    driver: local
